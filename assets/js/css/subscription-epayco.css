@@ -1,0 +1,14 @@
+/* input[type="tel"], input[type="text"] {
+    display: block;
+}
+
+.error-subscription-epayco {
+    background-color: #ff0000;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.error-subscription-epayco .message {
+    color: #ffffff;
+    font-weight: bold;
+} */

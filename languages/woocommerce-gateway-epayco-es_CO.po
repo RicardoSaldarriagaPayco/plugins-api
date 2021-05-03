@@ -1,0 +1,86 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: woocommerce-gateway-epayco\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-07-18 22:41+0000\n"
+"PO-Revision-Date: 2019-07-18 22:42+0000\n"
+"Last-Translator: wpdev <cortuclas@gmail.com>\n"
+"Language-Team: Español de Colombia\n"
+"Language: es_CO\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.3.0; wp-5.2.2"
+
+#: includes/woocommerce-gateway-epayco:75
+msgid "ePayco works by adding payment fields on the checkout and then sending the details to ePayco for verification."
+msgstr "ePayco funciona agregando campos de pago en la caja y luego enviando los detalles a ePayco para su verificación."
+
+#: woocommerce-gateway-epayco:171
+msgid "Tipo de documento"
+msgstr ""
+
+#: woocommerce-gateway-epayco:172
+msgctxt "placeholder"
+msgid ""
+msgstr ""
+
+#: woocommerce-gateway-epayco:189
+msgid "DNI"
+msgstr "Número de documento"
+
+#: woocommerce-gateway-epayco:190
+msgctxt "placeholder"
+msgid "Your DNI here...."
+msgstr "Su Número de documento" aquí..."
+
+#: woocommerce-gateway-epayco:150
+msgid "The type of card is not accepted"
+msgstr "No se acepta el tipo de tarjeta"
+
+#: woocommerce-gateway-epayco:151
+msgid "Enter the card information"
+msgstr "Ingrese la información de la tarjeta"
+
+#: woocommerce-gateway-epayco:152
+msgid "Please wait..."
+msgstr "Espere por favor..."
+
+#: woocommerce-gateway-epayco:153
+msgid "Redirecting to verify status..."
+msgstr ""
+
+#: woocommerce-gateway-epayco:154
+msgid "Card number, invalid"
+msgstr "Número de tarjeta inválido"
+
+#: woocommerce-gateway-epayco:155
+msgid "Invalid card expiration date"
+msgstr "Fecha de vencimiento de la tarjeta no válida"
+
+#: includes/class-gateway-subscription-epayco.php:18
+msgid "To subscribe"
+msgstr "Suscribirse"
+
+#: includes/class-gateway-subscription-epayco.php:77
+msgid "Data of card"
+msgstr "Datos de la tarjeta"
+
+#: includes/class-gateway-subscription-epayco.php:78
+msgid "Card number"
+msgstr "Número de tarjeta"
+
+#: includes/class-gateway-subscription-epayco.php:79
+msgid "Cardholder"
+msgstr "Titular de la tarjeta"
+
+#. Name of the plugin
+msgid "woocommerce-gateway-epayco"
+msgstr ""
+
+#. Description of the plugin
+msgid "Cobros periódicos, suscripciones de ePayco"
+msgstr ""
+
