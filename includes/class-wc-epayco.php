@@ -33,36 +33,37 @@ class Epayco_SE extends WC_Epayco
         $order = new WC_Order($order_id);
         if (!EpaycoOrder::ifExist($order_id)) {
             //si no se restauro el stock restaurarlo inmediatamente
-            $this->restore_order_stock($order_id);
-            EpaycoOrder::create($order_id,1);
+            //$this->restore_order_stock($order_id,'decrease');
+            EpaycoOrder::create($order_id, 1);
         }
 
         $descripcionParts = array();
         foreach ($order->get_items() as $product) {
             $descripcionParts[] = $this->string_sanitize($product['name']);
         }
-
         $descripcion = implode(' - ', $descripcionParts);
-
-        $tax=$order->get_total_tax();
-        $tax=round($tax,2);
-        if((int)$tax>0){
-            $base_tax=$order->get_total()-$tax;
-        }else{
-            $base_tax=0;
-            $tax=0;
+        $tax = $order->get_total_tax();
+        $tax = round($tax, 2);
+        if ((int)$tax > 0) {
+            $base_tax = $order->get_total() - $tax;
+        } else {
+            $base_tax = 0;
+            $tax = 0;
         }
+        $redirect_url = get_site_url() . "/";
+        $confirm_url = get_site_url() . "/";
+        $redirect_url = add_query_arg('wc-api', 'WC_Epayco', $redirect_url);
+        $redirect_url = add_query_arg('order_id', $order_id, $redirect_url);
+        $confirm_url = add_query_arg('wc-api', 'WC_Epayco', $confirm_url);
+        $confirm_url = add_query_arg('order_id', $order_id, $confirm_url);
+        $confirm_url = $redirect_url . '&confirmation=1';
 
-        $redirect_url =get_site_url() . "/";
-        $confirm_url=get_site_url() . "/";
-        $redirect_url = add_query_arg( 'wc-api', 'WC_Epayco' , $redirect_url );
-        $redirect_url = add_query_arg( 'order_id', $order_id, $redirect_url );
-        $confirm_url = add_query_arg( 'wc-api', 'WC_Epayco' , $confirm_url );
-        $confirm_url = add_query_arg( 'order_id', $order_id, $confirm_url );
-        $confirm_url = $redirect_url.'&confirmation=1';
-
+        $response_status = [
+            'status' => false,
+            'message' => __('Los datos son erroneos o son requeridos por favor intente nuevamente!.', 'woocommerce-gateway-epayco')
+        ];
+        $customerData = $this->paramsBilling($order);
         $orderInfo = array(
-            //'bill' => $order->get_id(),
             "description" => $descripcion,
             "value" => $order->get_total(),
             "tax" => $tax,
@@ -70,184 +71,140 @@ class Epayco_SE extends WC_Epayco
             "currency" => $order->get_currency(),
             "url_response" => $redirect_url,
             "url_confirmation" => $confirm_url,
-            "use_default_card_customer" => true,
             "ip" => $this->getIP(),
-            "extras"=> array(
+            "extras" => array(
                 "extra1" => "Woocommerce",
                 "extra2" => $order->get_id()
-                    )
+            )
         );
 
-        $card = $this->prepareDataCard($params);
-        $token = $this->tokenCreate($card);
-        if($token->status){
-        //if(true){
-        $customerData = $this->paramsBilling($order);
-        $customerData['token_card'] = $token->id;
-        //$customerData['token_card'] = '0805db51e5c2b522f111d85';
-    
-        $sql = EpaycoRules::ifExist(trim($this->epayco_customerid ));
-        if(!$sql) {
-            $customer = $this->customerCreate($customerData);
-            if($customer->status){
-            //if(true){
-                $customerData['customer_id'] = $customer->data->customerId;
-                //$customerData['customer_id'] = '0804a8f30fd0550b728194d';
-
-                $registerCustomerToBd= EpaycoRules::create(trim($this->epayco_customerid ),$customerData['customer_id'],$customerData['token_card'],$customerData['email']);
-                if(!$registerCustomerToBd){
-                    $register = 'please, try again!';
-                    return $response_status = [
+        if ($params['cars'] != "creditCard") {
+            $orderInfo['invoice'] = $order->get_id();
+            $orderInfo['type_person'] =  $params['typePerson'];
+            if ($params['cars'] == "pse") {
+                $orderInfo['bank'] = $params['pse'];
+            } else {
+                $orderInfo['end_date'] = $params['trip-start'];
+                $paymentCharge = array_merge($customerData, $orderInfo);
+                $paymentCash = $this->paymentCash($params['cash'],$paymentCharge);
+                if($paymentCash->success){
+                    $this->setNewOrderStatus($paymentCash,$order_id,$order);
+                    $response_status =
+                        ['status' => true,
+                            'message' => '',
+                            'url' => $this->get_return_url($order)
+                        ];
+                } else {
+                    $response_status = [
                         'status' => false,
                         'message' => __(
-                            $register,
+                            $paymentCash->data->errors[0]->errorMessage,
                             'woocommerce-gateway-epayco')
-                    ]; 
+                    ];
                 }
-                         
-            }else{
-                $response_status = [
-                    'status' => false,
-                    'message' => __(
-                        'Cliente ya asociado ó token inexistente',
-                         'woocommerce-gateway-epayco')
-                ]; 
             }
         }else{
-
-            
-            $counter = 0;
-           for ($i=0; $i < count($sql); $i++) { 
-                         
-                if($sql[$i]->email == $customerData['email']){
-                    $customerAddtoken = $this->customerAddToken($sql[$i]->customer_id, $customerData['token_card']);
-                        if(!$customerAddtoken->status){
-                                $response_status = [
-                                    'status' => false,
-                                    'message' => __('Cliente ya asociado ó token inexistente', 'woocommerce-gateway-epayco')
-                                ];
-                                return $response_status;
-                            }                
-                $customer_id_ =  $sql[$i]->customer_id;
-                }else{
-                    $counter += 1;
-                }  
-                      
-            }
-            if($counter == count($sql))
-            {
-                       
-                            $customer = $this->customerCreate($customerData);
-                            if($customer->status)
-                            {
-                                $customerData['customer_id'] = $customer->data->customerId;
-                                
-                                $registerCustomerToBd= EpaycoRules::create(trim($this->epayco_customerid ),$customerData['customer_id'],$customerData['token_card'],$customerData['email']);
-                                if(!$registerCustomerToBd){
-                                    $register = 'please, try again!';
-                                    return $response_status = [
+            $orderInfo["use_default_card_customer"] = true;
+            $orderInfo['bill'] = $order->get_id();
+            $card = $this->prepareDataCard($params);
+            $token = $this->tokenCreate($card);
+            if ($token->status) {
+                //if(true){
+                $customerData = $this->paramsBilling($order);
+                $customerData['token_card'] = $token->id;
+                //$customerData['token_card'] = '2797719fdc88623de3eaec3';
+                $sql = EpaycoRules::ifExist(trim($this->epayco_customerid));
+                if (!$sql) {
+                    $customer = $this->customerCreate($customerData);
+                    if ($customer->status) {
+                        //if(true){
+                        $customerData['customer_id'] = $customer->data->customerId;
+                        //$customerData['customer_id'] = '2797dda245088535e1c9383';
+                        die();
+                        $registerCustomerToBd = EpaycoRules::create(trim($this->epayco_customerid), $customerData['customer_id'], $customerData['token_card'], $customerData['email']);
+                        if (!$registerCustomerToBd) {
+                            $register = 'please, try again!';
+                            return $response_status = [
+                                'status' => false,
+                                'message' => __(
+                                    $register,
+                                    'woocommerce-gateway-epayco')
+                            ];
+                        }
+                    } else {
+                        $response_status = [
+                            'status' => false,
+                            'message' => __(
+                                'Cliente ya asociado ó token inexistente',
+                                'woocommerce-gateway-epayco')
+                        ];
+                    }
+                } else {
+                    $counter = 0;
+                    for ($i = 0; $i < count($sql); $i++) {
+                        if ($sql[$i]->email == $customerData['email']) {
+                            if($sql[$i]->token_id != $customerData['token_card']){
+                                $customerAddtoken = $this->customerAddToken($sql[$i]->customer_id, $customerData['token_card']);
+                                if (!$customerAddtoken->status) {
+                                    $response_status = [
                                         'status' => false,
-                                        'message' => __(
-                                            $register,
-                                            'woocommerce-gateway-epayco')
-                                    ]; 
+                                        'message' => __('Cliente ya asociado ó token inexistente', 'woocommerce-gateway-epayco')
+                                    ];
+                                    return $response_status;
                                 }
-                                         
-                            }else{
-                                $response_status = [
+                            }
+                            $customer_id_ = $sql[$i]->customer_id;
+                        } else {
+                            $counter += 1;
+                        }
+                    }
+                    if ($counter == count($sql)) {
+                        $customer = $this->customerCreate($customerData);
+                        if ($customer->status) {
+                            $customerData['customer_id'] = $customer->data->customerId;
+                            $registerCustomerToBd = EpaycoRules::create(trim($this->epayco_customerid), $customerData['customer_id'], $customerData['token_card'], $customerData['email']);
+                            if (!$registerCustomerToBd) {
+                                $register = 'please, try again!';
+                                return $response_status = [
                                     'status' => false,
                                     'message' => __(
-                                        'Cliente ya asociado ó token inexistente',
-                                         'woocommerce-gateway-epayco')
-                                ]; 
+                                        $register,
+                                        'woocommerce-gateway-epayco')
+                                ];
                             }
-                            
-            }
-
-            
-        }
-
-        $customerData['customer_id'] = $customerData['customer_id'] ? $customerData['customer_id'] : $customer_id_;
-
- 
-                $customerData = array_merge($customerData, $card);
-                $paymentCharge = array_merge($customerData, $orderInfo );
-                $paymentCharge_ = $this->paymentCharge($paymentCharge);
-                if($paymentCharge_->status){
-                    switch ((int)$paymentCharge_->data->cod_respuesta) {
-                        case 1:{
-                            if (!EpaycoOrder::ifStockDiscount($order_id)) {
-                                //se descuenta el stock
-                                if (EpaycoOrder::updateStockDiscount($order_id,1)) {
-                                    $this->restore_order_stock($order_id,'decrease');
-                                }
-                            }
-                            $order->payment_complete();
-                            $order->update_status('completed');
-                            $note  = sprintf(__('Successful Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
-                            $paymentCharge_->data->ref_payco);
-                            $order->add_order_note($note);
-                            update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
-                        }break;
-                        case 2: {
-                            $order->update_status('failed');
-                            $note  = sprintf(__('Rejected Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
-                            $paymentCharge_->data->ref_payco);
-                            $order->add_order_note($note);
-                            update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
-                        }break;
-                        case 3: {
-                            //Busca si ya se restauro el stock y si se configuro reducir el stock en transacciones pendientes  
-                            if (!EpaycoOrder::ifStockDiscount($order_id)) {
-                                //reducir el stock
-                                if (EpaycoOrder::updateStockDiscount($order_id,1)) {
-                                    $this->restore_order_stock($order_id,'decrease');
-                                }
-                            }
-                            $order->update_status('pending');
-                            $note  = sprintf(__('Pending Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
-                            $paymentCharge_->data->ref_payco);
-                            $order->add_order_note($note);
-                            update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
-                        }break;
-                        case 4: {
-                            $order->update_status('failed');
-                            $note  = sprintf(__('Rejected Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
-                            $paymentCharge_->data->ref_payco);
-                            $order->add_order_note($note);
-                            update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
-                        }break;
-                        default:{
-                            $order->update_status('failed');
-                            $note  = sprintf(__('failed Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
-                            $paymentCharge_->data->ref_payco);
-                            $order->add_order_note($note);
-                            update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
-                        }break;
+                        } else {
+                            $response_status = [
+                                'status' => false,
+                                'message' => __(
+                                    'Cliente ya asociado ó token inexistente',
+                                    'woocommerce-gateway-epayco')
+                            ];
+                        }
                     }
-                    $response_status = 
+                }
+
+                $customerData['customer_id'] = $customerData['customer_id'] ? $customerData['customer_id'] : $customer_id_;
+
+                $customerData = array_merge($customerData, $card);
+                $paymentCharge = array_merge($customerData, $orderInfo);
+                $paymentCharge_ = $this->paymentCharge($paymentCharge);
+                if ($paymentCharge_->status) {
+                    $this->setNewOrderStatus($paymentCharge_,$order_id,$order);
+                    $response_status =
                         ['status' => true,
-                        'message' => '',
-                        'url' => $this->get_return_url( $order )
+                            'message' => '',
+                            'url' => $this->get_return_url($order)
                         ];
-                }else{
+                } else {
                     $response_status = [
                         'status' => false,
                         'message' => __(
                             $paymentCharge_->data->errors[0]->errorMessage,
-                             'woocommerce-gateway-epayco')
+                            'woocommerce-gateway-epayco')
                     ];
                 }
-
-            
-
-        }else{
-            $response_status = [
-                'status' => false,
-                'message' => __('Los datos son erroneos o son requeridos por favor intente nuevamente!.', 'woocommerce-gateway-epayco')
-            ];
+            }
         }
-
         return $response_status;
     }
 
@@ -255,9 +212,7 @@ class Epayco_SE extends WC_Epayco
     {
         $data = [];
         $card_number = str_replace(" ", "", $params['subscriptionepayco_number']);
-        //$data['card_number'] = str_replace(' ','', $card_number);
         $data['card_number'] = $card_number;
-        //$card_expire = explode('/', $params['subscriptionepayco_expiry']);
         $data['cvc'] = $params['cvc'];
         $data['card_expire_year'] = $params['year-value'];
         $data['card_expire_month'] = $params['month-value'];
@@ -361,7 +316,41 @@ class Epayco_SE extends WC_Epayco
                 "name" => $data['name'],
                 "last_name" => $data['last_name'],
                 "email" => $data['email'],
-                //"bill" => "OR-1234",
+                //"bill" => $data['bill'],
+                "description" => $data['description'],
+                "value" => $data['value'],
+                "tax" => $data['tax'],
+                "tax_base" => $data['tax_base'],
+                "currency" => $data['currency'],
+                "dues" => $data['dues'],
+                "address" => $data['address'],
+                "phone"=> $data['address'],
+                "ip" => $data['ip'],  // This is the client's IP, it is required
+                "url_response" => $data['url_response'],
+                "url_confirmation" => $data['url_confirmation'],
+            ));
+        }catch (Exception $exception){
+            //subscription_epayco_se()->log('tokenCreate: ' . $exception->getMessage());
+            echo 'paymentCreate: ' . $exception->getMessage();
+            die();
+        }
+        return $payment;
+    }
+
+    public function paymentCash($paymentmethod,array $data)
+    {
+        $payment = false;
+        try{
+            $payment = $this->epayco->cash->create($paymentmethod, array(
+                "token_card" => $data['token_card'],
+                "customer_id" => $data['customer_id'],
+                "doc_type" => $data['type_document'],
+                "doc_number" => $data['doc_number'],
+                "name" => $data['name'],
+                "last_name" => $data['last_name'],
+                "type_person" => $data['type_person'],
+                "email" => $data['email'],
+                //"invoice" => $data['invoice'],
                 "description" => $data['description'],
                 "value" => $data['value'],
                 "tax" => $data['tax'],
@@ -411,6 +400,71 @@ class Epayco_SE extends WC_Epayco
             $ipaddress = '127.0.0.1';
 
         return $ipaddress;
+    }
+
+
+    public function setNewOrderStatus($paymentCharge_,$order_id,$order){
+        switch ((int)$paymentCharge_->data->cod_respuesta) {
+            case 1:
+                {
+                    if (!EpaycoOrder::ifStockDiscount($order_id)) {
+                        //se descuenta el stock
+                        if (EpaycoOrder::updateStockDiscount($order_id, 1)) {
+                            $this->restore_order_stock($order_id, 'decrease');
+                        }
+                    }
+                    $order->payment_complete();
+                    $order->update_status('completed');
+                    $note = sprintf(__('Successful Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
+                        $paymentCharge_->data->ref_payco);
+                    $order->add_order_note($note);
+                    update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
+                }
+                break;
+            case 2:
+                {
+                    $order->update_status('failed');
+                    $note = sprintf(__('Rejected Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
+                        $paymentCharge_->data->ref_payco);
+                    $order->add_order_note($note);
+                    update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
+                }
+                break;
+            case 3:
+                {
+                    //Busca si ya se restauro el stock y si se configuro reducir el stock en transacciones pendientes
+                    if (!EpaycoOrder::ifStockDiscount($order_id)) {
+                        //reducir el stock
+                        if (EpaycoOrder::updateStockDiscount($order_id, 1)) {
+                            // $this->restore_order_stock($order_id, 'decrease');
+                        }
+                    }
+                    $order->update_status('pending');
+                    $note = sprintf(__('Pending Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
+                        $paymentCharge_->data->ref_payco);
+                    $order->add_order_note($note);
+                    update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
+                }
+                break;
+            case 4:
+                {
+                    $order->update_status('failed');
+                    $note = sprintf(__('Rejected Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
+                        $paymentCharge_->data->ref_payco);
+                    $order->add_order_note($note);
+                    update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
+                }
+                break;
+            default:
+                {
+                    $order->update_status('failed');
+                    $note = sprintf(__('failed Payment (ref_payco: %s)', 'woocommerce-gateway-epayco'),
+                        $paymentCharge_->data->ref_payco);
+                    $order->add_order_note($note);
+                    update_post_meta($order->get_id(), 'ref_payco', $paymentCharge_->data->ref_payco);
+                }
+                break;
+        }
     }
 
     

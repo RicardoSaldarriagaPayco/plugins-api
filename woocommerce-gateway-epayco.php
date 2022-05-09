@@ -326,38 +326,14 @@ function woocommerce_gateway_epayco() {
             {
                 if ( $description = $this->get_description() )
                     echo wp_kses_post( wpautop( wptexturize( $description ) ) );
-                    // global $wpdb;
-                    // $table_name = $wpdb->prefix . "payco_rules";
-                    //  $sql = 'SELECT * FROM `wp_payco_rules` WHERE `id_payco` = '. trim($this->epayco_customerid) ;
-          
-                    // $results = $wpdb->get_results($sql, OBJECT);
-                   
-                    // if (count($results) == 0)
-                    // {
-                    //    var_dump($sql);
-                    // }else{
-                    //     $counter = 0;
-                    //     for ($i=0; $i < count($results); $i++) { 
-                          
-                    //        if($results[$i]->email == 'ricardo.saldarriaga7321@payco.co'){
-                    //         echo $results[$i]->email .'<br>';
-                    //        }else{
-                    //         $counter += 1;
-                    //        }
-                    //     }
-                    //     if($counter == count($results))
-                    //     {
-                    //         echo 'crear un nuevo cliente'.'<br>';
-                            
-                    //     }else{
-                    //         echo 'no crear cliente nuevo' .'<br>';
-                    //     }
-                        
-                    // }
                 ?>
+                <div id="myRadioGroup">
+                    Credit Card<input type="radio" name="cars" checked="checked" value="creditCard"  />
+                    PSE<input type="radio" name="cars" value="pse" />
+                    Cash<input type="radio" name="cars" value="cash" />
+                </div>
 
-
-                <div class="middle-xs bg_onpage porcentbody m-0" style="margin: 0">
+                <div class="middle-xs bg_onpage porcentbody m-0" style="display: block;margin: 0">
                     <div class="centered" id="centered">
                         <div class="onpage relative" id="web-checkout-content" style="
                                     border-radius: 5px;">
@@ -372,22 +348,22 @@ function woocommerce_gateway_epayco() {
                                 <div class="wc scroll-content">
                                     <div class="menu-select">
 
-                                            <div class="input-form">
-                                                <span style="
-                                                    position: absolute;
-                                                    padding-left: 63px;
-                                                    padding-top: 58px !important;
-                                                    line-height: 40px;
-                                                    font-size: 5px;
-                                                    ">
-                                                    <i class="fas fa-user loadshield2" style="color: #158cba; font-size: 17px;" aria-hidden="true"></i>
-                                                </span>
-                                                <input type="text" class="binding-input inspectletIgnore"  name="card_name" id="card_name" placeholder="<?php echo __('Cardholder', 'woocommerce-gateway-epayco'); ?>"  autocomplete="off" style="
+                                        <div class="input-form">
+                                            <span style="
+                                                position: absolute;
+                                                padding-left: 63px;
+                                                padding-top: 58px !important;
+                                                line-height: 40px;
+                                                font-size: 5px;
+                                                ">
+                                                <i class="fas fa-user loadshield2" style="color: #158cba; font-size: 17px;" aria-hidden="true"></i>
+                                            </span>
+                                            <input type="text" class="binding-input inspectletIgnore"  name="card_name" id="card_name" placeholder="<?php echo __('Cardholder', 'woocommerce-gateway-epayco'); ?>"  autocomplete="off" style="
                                                     border: 1px solid #e0e0e0;
                                                 " value="ricardo saldarriaga" >
-                                            </div>
+                                        </div>
 
-                                            <div class="input-form">
+                                        <div class="input-form">
                                             <span style="
                                                     position: absolute;
                                                     padding-left: 63px;
@@ -395,28 +371,31 @@ function woocommerce_gateway_epayco() {
                                                     line-height: 40px;
                                                     font-size: 5px;
                                                     ">
-                                                    <i class="fas fa-credit-card loadshield2" style="color: #158cba; font-size: 17px;" aria-hidden="true"></i>
-                                                </span>
-                                                <div id="card-epayco-suscribir">
-                                                    <div class='card-wrapper'></div>
-                                                    <div id="form-epayco">
-                                                    
-                                                        <input placeholder="<?php echo __('Card number', 'woocommerce-gateway-epayco'); ?>" type="tel" name="subscriptionepayco_number" id="subscriptionepayco_number" required="" class="form-control" style="
-                                                        border: 1px solid #e0e0e0;">
+                                                <i class="fas fa-credit-card loadshield2" style="color: #158cba; font-size: 17px;" aria-hidden="true"></i>
+                                            </span>
+                                            <div id="card-epayco-suscribir">
+                                                <div class='card-wrapper'></div>
+                                                <div id="form-epayco">
+
+                                                    <input placeholder="<?php echo __('Card number', 'woocommerce-gateway-epayco'); ?>"
+                                                           type="tel" name="subscriptionepayco_number"
+                                                           id="subscriptionepayco_number"
+                                                           required="" class="form-control"
+                                                           style="
+                                                    border: 1px solid #e0e0e0;">
 
                                                 </div>
-                                      
                                             </div>
 
                                             <div class="select-option bordergray vencimiento" style="float:left" id="expiration">
 
-                                                <div class="input-form full-width noborder monthcredit nomargin">         
+                                                <div class="input-form full-width noborder monthcredit nomargin">
                                                     <span class="icon-date_range color icon-select">
                                                         <i class="far fa-calendar-alt"></i>
                                                     </span>
                                                     <input class="binding-input inspectletIgnore" id="month-value" name="month-value" placeholder="MM" maxlength="2" autocomplete="off" data-epayco="card[exp_month]"  inputmode="numeric"  pattern="[0-9]*" required value="03">
                                                 </div>
-                                            
+
                                                 <div class="" style="
                                                                 float:left;
                                                                 width:10%;
@@ -430,7 +409,7 @@ function woocommerce_gateway_epayco() {
                                                                 /
                                                 </div>
 
-                                                <div class="input-form full-width normalinput noborder yearcredit nomargin">                
+                                                <div class="input-form full-width normalinput noborder yearcredit nomargin">
                                                     <input class="binding-input inspectletIgnore" name="year-value" id="year-value" placeholder="AAAA" maxlength="4" autocomplete="off" data-epayco="card[exp_year]" pattern="[0-9]*" inputmode="numeric" required value="2023">
                                                 </div>
 
@@ -482,20 +461,130 @@ function woocommerce_gateway_epayco() {
                                                     <option value="36">36</option>
                                                 </select>
                                             </div>
-                                            
-                                            <div class="clearfix" style="padding: 10px;"></div>
-                                            
-                                    </div>
-                                </div>
 
-                            </div>
+                                            <div class="clearfix" style="padding: 10px;"></div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="cuotas bordergray" id="typePersonSelector" style="margin-left: 3%;
+                                            margin-right: 3%;
+                                            border-radius: 5px;">
+                                        <label style="font-size: 17px;margin-left: 10px;"> Type person:</label>
+                                        <select class="select binding-select" name="typePerson" style="width: 66%;/* margin-left: 100px; */">
+                                            <option value="0">Natural</option>
+                                            <option value="1">Juridica</option>
+                                        </select>
+                                    </div>
+                                    <br>
+
+                                    <div class="select-option cuotas bordergray" id="pseSelector" style="display: none">
+                                        <select class="select binding-select" name="pse"  style="width: 100%;">
+                                        <?php
+                                            if($this->testmode == "yes"){
+                                        ?>
+                                            <option value="1077">BANKA</option>
+                                            <option value="1022">BANCO UNION COLOMBIANO</option>
+                                            <?php
+                                                }else{
+                                            ?>
+                                                <option value="1059">BANCAMIA S.A.</option>
+                                                <option value="1040">BANCO AGRARIO</option>
+                                                <option value="1052">BANCO AV VILLAS</option>
+                                                <option value="1013">BANCO BBVA COLOMBIA S.A.</option>
+                                                <option value="1032">BANCO CAJA SOCIAL</option>
+                                                <option value="1066">BANCO COOPERATIVO COOPCENTRAL</option>
+                                                <option value="1558">BANCO CREDIFINANCIERA</option>
+                                                <option value="1051">BANCO DAVIVIENDA</option>
+                                                <option value="1001">BANCO DE BOGOTA</option>
+                                                <option value="1023">BANCO DE OCCIDENTE</option>
+                                                <option value="1062">BANCO FALABELLA</option>
+                                                <option value="1012">BANCO GNB SUDAMERIS</option>
+                                                <option value="1006">BANCO ITAU</option>
+                                                <option value="1060">BANCO PICHINCHA S.A.</option>
+                                                <option value="1002">BANCO POPULAR</option>
+                                                <option value="1065">BANCO SANTANDER COLOMBIA</option>
+                                                <option value="1069">BANCO SERFINANZA</option>
+                                                <option value="1007">BANCOLOMBIA</option>
+                                                <option value="1061">BANCOOMEVA S.A.</option>
+                                                <option value="1283">CFA COOPERATIVA FINANCIERA</option>
+                                                <option value="1009">CITIBANK</option>
+                                                <option value="1370">COLTEFINANCIERA</option>
+                                                <option value="1292">CONFIAR COOPERATIVA FINANCIERA</option>
+                                                <option value="1291">COOFINEP COOPERATIVA FINANCIERA</option>
+                                                <option value="1289">COTRAFA</option>
+                                                <option value="1097">DALE</option>
+                                                <option value="1551">DAVIPLATA</option>
+                                                <option value="1303">GIROS Y FINANZAS COMPAÑIA DE FINANCIAMIENTO S.A.</option>
+                                                <option value="1637">IRIS</option>
+                                                <option value="1801">MOVII S.A.</option>
+                                                <option value="1507">NEQUI</option>
+                                                <option value="1151">RAPPIPAY</option>
+                                                <option value="1019">SCOTIABANK COLPATRIA</option>
+                                            <?php
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="select-option cuotas bordergray" id="cashSelector" style="display: none">
+                                        <select class="select binding-select" name="cash" style="width: 100%;">
+                                            <option value="efecty">efecty</option>
+                                            <option value="baloto">baloto</option>
+                                            <option value="gana">gana</option>
+                                            <option value="redservi">redservi</option>
+                                            <option value="puntored">puntored</option>
+                                            <option value="sured">sured</option>
+                                            <option value="apostar">apostar</option>
+                                            <option value="susuerte">susuerte</option>
+                                        </select>
+                                    </div>
+                                    <div id="expiration-cash-date" style="display: none; padding-left: 20px;padding-top: 20px;">
+                                        <label>date expiration:
+                                    <input type="date" id="start" name="trip-start"
+                                           min="2022-01-01" max="2034-12-31" required/>
+                                        </label>
+                                    </div>
+                                    <br>
+
+
+                                </div>
                         
                         </div>
                                 
                     </div>
 
-                <div> 
-   
+                <div>
+
+                <script type="text/javascript">
+                    jQuery( document ).ready( function( $ ) {
+                        $("input[name$='cars']").click(function() {
+                            var paymentMethod = $(this).val();
+                            if(paymentMethod != "creditCard"){
+                                $(".menu-select").hide();
+                                if(paymentMethod != "pse"){
+                                    $("#pseSelector").hide();
+                                    $("#cashSelector").show();
+                                    $("#expiration-cash-date").show();
+                                    $("#typePersonSelector").show();
+                                }else{
+                                    $("#pseSelector").show();
+                                    $("#cashSelector").hide();
+                                    $("#expiration-cash-date").hide();
+                                    $("#typePersonSelector").show();
+                                }
+                            }else{
+                                $(".menu-select").show();
+                                $("#pseSelector").hide();
+                                $("#cashSelector").hide();
+                                $("#expiration-cash-date").hide();
+                                $("#typePersonSelector").hide();
+                            }
+
+                        });
+                    });
+                </script>
+
 
                 <?php
             }
@@ -527,39 +616,50 @@ function woocommerce_gateway_epayco() {
 
                 if($_POST['payment_method'] != 'epayco')
                     return;
-            
-                if( !isset($_POST['card_name']) || empty($_POST['card_name']) )
-                {
-                    wc_add_notice( 'Please add your credit card name', 'error' );
+
+                if($_POST['cars'] != 'creditCard'){
+                    if($_POST['cars'] == 'cash') {
+                        if( !isset($_POST['trip-start']) || empty($_POST['trip-start']) )
+                        {
+                            wc_add_notice( 'Please add expiration date', 'error' );
+                        }else{
+                            return;
+                        }
+                    }else{
+                        return;
+                    }
+                }else{
+                    if( !isset($_POST['card_name']) || empty($_POST['card_name']) )
+                    {
+                        wc_add_notice( 'Please add your credit card name', 'error' );
+                    }
+
+                    if( !isset($_POST['subscriptionepayco_number']) || empty($_POST['subscriptionepayco_number']) )
+                    {
+                        wc_add_notice( 'Please add your credit card number', 'error' );
+                    }
+
+                    if( !isset($_POST['month-value']) || empty($_POST['month-value']) )
+                    {
+                        wc_add_notice(  'Please add your credit card expitarion month', 'error' );
+                    }
+
+                    if( !isset($_POST['year-value']) || empty($_POST['year-value']) )
+                    {
+                        wc_add_notice(  'Please add your credit card expitarion year', 'error' );
+                    }
+
+                    if( !isset($_POST['dues']) || empty($_POST['dues']) )
+                    {
+                        wc_add_notice(  'Please add your dues', 'error' );
+                    }
+
+                    if( !isset($_POST['cvc']) || empty($_POST['cvc']) )
+                    {
+                        wc_add_notice(  'Please add your credit card cvc', 'error' );
+                    }
                 }
 
-                if( !isset($_POST['subscriptionepayco_number']) || empty($_POST['subscriptionepayco_number']) )
-                {
-                    wc_add_notice( 'Please add your credit card number', 'error' );
-                }
-
-                if( !isset($_POST['month-value']) || empty($_POST['month-value']) )
-                {
-                    wc_add_notice(  'Please add your credit card expitarion month', 'error' );
-                }
-
-                if( !isset($_POST['year-value']) || empty($_POST['year-value']) )
-                {
-                    wc_add_notice(  'Please add your credit card expitarion year', 'error' );
-                }
-
-                if( !isset($_POST['dues']) || empty($_POST['dues']) )
-                {
-                    wc_add_notice(  'Please add your dues', 'error' );
-                }
-
-                if( !isset($_POST['cvc']) || empty($_POST['cvc']) )
-                {
-                    wc_add_notice(  'Please add your credit card cvc', 'error' );
-                }
-
-                
-        
             }
 
             function check_ePayco_response(){
@@ -685,7 +785,7 @@ function woocommerce_gateway_epayco() {
                                     $messageClass = 'woocommerce-error';
                                     $order->update_status('failed');
                                     $order->add_order_note('Pago fallido');
-                                    $this->restore_order_stock($order->id);
+                                    $this->restore_order_stock($order->get_id());
                                     }
                                 }
                             }break;
@@ -798,14 +898,6 @@ function custom_checkout_field_display_($order){
 add_action('plugins_loaded','woocommerce_gateway_epayco_init');
 function woocommerce_gateway_epayco_init() {
 	load_plugin_textdomain( 'woocommerce-gateway-epayco', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
-	// if ( ! class_exists( 'WooCommerce' ) ) {
-	// 	add_action( 'admin_notices', 'woocommerce_stripe_missing_wc_notice' );
-	// 	return;
-	// }
-	// if ( version_compare( WC_VERSION, WC_STRIPE_MIN_WC_VER, '<' ) ) {
-	// 	add_action( 'admin_notices', 'woocommerce_stripe_wc_not_supported' );
-	// 	return;
-	// }
     if (!class_exists('WC_Payment_Gateway')) {
         return;
     }
