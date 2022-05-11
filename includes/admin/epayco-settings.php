@@ -59,4 +59,16 @@ return array(
         'description' => __('Habilite para realizar pruebas', 'woocommerce-gateway-epayco'),
         'default' => 'no',
     ),
+    'epayco_endorder_state' => array(
+        'title' => __('Estado Final del Pedido', 'epayco_woocommerce'),
+        'type' => 'select',
+        'css' =>'line-height: inherit',
+        'description' => __('Seleccione el estado del pedido que se aplicará a la hora de aceptar y confirmar el pago de la orden', 'woocommerce-gateway-epayco'),
+        'options' => array(
+            'epayco-processing'=>"ePayco Procesando Pago",
+            "epayco-completed"=>"ePayco Pago Completado",
+            'processing'=>"Procesando",
+            "completed"=>"Completado"
+        ),
+    ),
 );
