@@ -6,7 +6,15 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit56b0e25273b3f8a8250793c915f765af
 {
+    public static $files = array (
+        '941748b3c8cae4466c827dfb5ca9602a' => __DIR__ . '/..' . '/rmccue/requests/library/Deprecated.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
+        'W' => 
+        array (
+            'WpOrg\\Requests\\' => 15,
+        ),
         'E' => 
         array (
             'Epayco\\' => 7,
@@ -14,20 +22,19 @@ class ComposerStaticInit56b0e25273b3f8a8250793c915f765af
     );
 
     public static $prefixDirsPsr4 = array (
+        'WpOrg\\Requests\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/rmccue/requests/src',
+        ),
         'Epayco\\' => 
         array (
             0 => __DIR__ . '/..' . '/epayco/epayco-php/src',
         ),
     );
 
-    public static $prefixesPsr0 = array (
-        'R' => 
-        array (
-            'Requests' => 
-            array (
-                0 => __DIR__ . '/..' . '/rmccue/requests/library',
-            ),
-        ),
+    public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Requests' => __DIR__ . '/..' . '/rmccue/requests/library/Requests.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -35,7 +42,7 @@ class ComposerStaticInit56b0e25273b3f8a8250793c915f765af
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit56b0e25273b3f8a8250793c915f765af::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit56b0e25273b3f8a8250793c915f765af::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit56b0e25273b3f8a8250793c915f765af::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit56b0e25273b3f8a8250793c915f765af::$classMap;
 
         }, null, ClassLoader::class);
     }
